@@ -1,0 +1,24 @@
+mode: mock
+robot:
+  can_interface: can0
+  auto_enable: false
+  control_rate_hz: 10.0
+  state_timeout_s: 1.0
+  joint_limits:
+    min: [-2.6179, 0.0, -2.967, -1.745, -1.22, -2.09439]
+    max: [2.6179, 3.14, 0.0, 1.745, 1.22, 2.09439]
+  max_delta: [0.20, 0.20, 0.20, 0.20, 0.20, 0.20]
+  home_joint_position: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  gripper:
+    min: 0.0
+    max: 1.0
+    open: 1.0
+    closed: 0.0
+  shutdown:
+    auto_disable: true
+    stop_on_exit: false
+  gui:
+    poll_rate_hz: 5.0
+    experimental_cartesian_enabled: false
+    master_slave_config_enabled: false
+    master_slave_advanced_offsets_enabled: false

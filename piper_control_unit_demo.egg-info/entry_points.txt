@@ -1,0 +1,2 @@
+[console_scripts]
+piper-gui = src.gui.__main__:main

@@ -1,0 +1,17 @@
+PyYAML<7.0,>=6.0
+requests<3.0,>=2.32
+websockets<16.0,>=12.0
+
+[dev]
+pytest<9.0,>=8.2
+ruff<1.0,>=0.6
+
+[gui]
+PySide6<7.0,>=6.6
+
+[real]
+piper-sdk>=0.6.1
+python-can<5.0,>=4.4
+
+[vision]
+opencv-python<5.0,>=4.10

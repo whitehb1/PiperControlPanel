@@ -1,0 +1,123 @@
+Metadata-Version: 2.4
+Name: piper-control-unit-demo
+Version: 0.1.0
+Summary: A modular real-robot control unit demo for the AgileX Piper arm.
+Author: Claude Code
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: PyYAML<7.0,>=6.0
+Requires-Dist: requests<3.0,>=2.32
+Requires-Dist: websockets<16.0,>=12.0
+Provides-Extra: real
+Requires-Dist: piper-sdk>=0.6.1; extra == "real"
+Requires-Dist: python-can<5.0,>=4.4; extra == "real"
+Provides-Extra: vision
+Requires-Dist: opencv-python<5.0,>=4.10; extra == "vision"
+Provides-Extra: gui
+Requires-Dist: PySide6<7.0,>=6.6; extra == "gui"
+Provides-Extra: dev
+Requires-Dist: pytest<9.0,>=8.2; extra == "dev"
+Requires-Dist: ruff<1.0,>=0.6; extra == "dev"
+
+# piper-control-unit-demo
+
+A modular real-robot control unit for Piper arm, designed to decouple low-level robot control from policy inference, with both real-hardware mode and mock/demo mode.
+
+## Scope
+- Connect to a real Piper arm from Ubuntu 20
+- Read robot state
+- Send joint and gripper actions
+- Run actions through a pluggable policy interface
+- Support both `real` and `mock` modes
+
+## Non-goals
+- No ROS1 inheritance as the main architecture
+- No full ROS2 package in v1
+- No training pipeline
+- No complex GUI as the main control architecture; the optional GUI is only an auxiliary manual tool
+- No Cartesian control as the main interface
+
+## Repository layout
+- [config/](config/) runtime YAML files
+- [docs/](docs/) architecture and bring-up notes
+- [src/core/](src/core/) stable control interfaces
+- [src/drivers/](src/drivers/) robot and camera drivers
+- [src/policies/](src/policies/) mock and remote policy adapters
+- [src/app/](src/app/) shared session and manual-control application layer
+- [src/gui/](src/gui/) optional PySide6 manual control panel
+- [scripts/](scripts/) runnable demos
+- [tests/](tests/) mock and safety coverage
+
+## Environment setup
+1. Miniconda is installed under `/home/leeviy/miniconda3`.
+2. Activate the environment:
+   - `source /home/leeviy/miniconda3/etc/profile.d/conda.sh`
+   - `conda activate PiperArm`
+3. Install dependencies:
+   - `pip install -r requirements.txt`
+
+## Mock mode
+Run the full loop without hardware:
+
+```bash
+source /home/leeviy/miniconda3/etc/profile.d/conda.sh
+conda activate PiperArm
+cd /home/leeviy/Desktop/PiperArm
+python scripts/run_policy_loop.py --mode mock --max-steps 10
+```
+
+## Real mode
+Real mode now defaults to the official `piper-sdk` `C_PiperInterface_V2` client in [src/drivers/piper_driver.py](src/drivers/piper_driver.py).
+
+Typical flow:
+
+```bash
+source /home/leeviy/miniconda3/etc/profile.d/conda.sh
+conda activate PiperArm
+cd /home/leeviy/Desktop/PiperArm
+bash scripts/find_all_can_port.sh
+bash scripts/activate_can.sh can0 1000000
+bash scripts/check_can.sh can0
+python scripts/enable_robot.py --mode real
+```
+
+## GUI tool
+The Linux GUI is an auxiliary manual-control tool. It uses the shared session layer and still sends all motion through [src/core/executor.py](src/core/executor.py) and [src/core/safety.py](src/core/safety.py); it does not replace the policy/VLA path.
+
+Install GUI dependencies:
+
+```bash
+python -m pip install -e ".[gui,real]"
+```
+
+Start without hardware:
+
+```bash
+bash scripts/launch_gui.sh mock
+```
+
+Start with real hardware after CAN is active:
+
+```bash
+bash scripts/activate_can.sh can0 1000000 3-1.2:1.0
+bash scripts/launch_gui.sh real
+```
+
+## Demo scripts
+- [scripts/find_all_can_port.sh](scripts/find_all_can_port.sh)
+- [scripts/activate_can.sh](scripts/activate_can.sh)
+- [scripts/check_can.sh](scripts/check_can.sh)
+- [scripts/enable_robot.py](scripts/enable_robot.py)
+- [scripts/move_joint_demo.py](scripts/move_joint_demo.py)
+- [scripts/open_gripper.py](scripts/open_gripper.py)
+- [scripts/close_gripper.py](scripts/close_gripper.py)
+- [scripts/run_policy_loop.py](scripts/run_policy_loop.py)
+- [scripts/launch_gui.sh](scripts/launch_gui.sh)
+- [scripts/bootstrap_env.sh](scripts/bootstrap_env.sh)
+- [scripts/install_system_deps.sh](scripts/install_system_deps.sh)
+
+## Migration to ROS2
+The core interfaces live in [src/core/](src/core/) and are intentionally ROS-agnostic. A later ROS2 Jazzy migration should add a bridge layer instead of rewriting the control unit.
+
+## Current limitation
+The real driver in [src/drivers/piper_driver.py](src/drivers/piper_driver.py) already targets the official `C_PiperInterface_V2` API, but gripper travel defaults to a normalized-to-millimeter mapping that may need calibration on your hardware. Mock mode is fully runnable now.

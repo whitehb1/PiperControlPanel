@@ -1,0 +1,15 @@
+policy:
+  type: mock
+  prompt: "pick up the cup"
+  mock:
+    mode: scripted_pick_demo
+    amplitude: 0.10
+    period_s: 4.0
+    fixed_joint_position: [0.0, 0.3, 0.5, 0.0, 0.8, 0.0]
+    fixed_gripper_position: 1.0
+  websocket:
+    url: "ws://127.0.0.1:8000/ws"
+    timeout_s: 5.0
+  http:
+    url: "http://127.0.0.1:8000/infer"
+    timeout_s: 5.0

@@ -1,0 +1,9 @@
+demo:
+  mode: mock
+  max_steps: 50
+  sleep_between_steps_s: 0.0
+  log_level: INFO
+  camera:
+    mode: none
+    path: null
+    device_index: 0
